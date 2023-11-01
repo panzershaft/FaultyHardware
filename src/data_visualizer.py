@@ -1,16 +1,6 @@
-import numpy as np
-import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
-import logging
-
-from sklearn.feature_selection import VarianceThreshold
-from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score
-import xgboost as xgb
 from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve
-from sklearn.preprocessing import StandardScaler
 
 
 class DataVisualizer:
