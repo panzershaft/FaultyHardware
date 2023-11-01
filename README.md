@@ -8,6 +8,10 @@ This project comprises a systematic pipeline for handling, analyzing, and modeli
 It includes functionalities ranging from data preprocessing steps such as missing value imputation and feature scaling, to model training and evaluation with various machine learning algorithms, 
 and data visualization techniques to assess model performance and insights.
 
+## Note
+- The data set is confidential hence not provided.
+- The suggested_features are also confidentiial and not provided.
+
 ## Process Pipelines
 
 1. **Data Preprocessing** (`DataPreprocessor` Class)
@@ -50,7 +54,3 @@ run_config = {
 
 run_experiment(file_path, run_config)
 ```
-
-## Note
-- The data set is confidential hence not provided.
-- The suggested_features are also confidentiial and not provided.
