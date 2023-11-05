@@ -24,10 +24,12 @@ class DataPreprocessor:
             logging.error(f"File not found: {self.filepath}")
         except Exception as e:
             logging.warning(f"Error occurred while loading the data: {e}")
+        return self
 
     def drop_empty_rows_and_columns(self):
         self.data.dropna(axis=0, how='all', inplace=True)
         self.data.dropna(axis=1, how='all', inplace=True)
+        return self
 
     def drop_column(self, column_name: str):
         if column_name in self.data.columns:
@@ -35,20 +37,24 @@ class DataPreprocessor:
             print(f"Column '{column_name}' dropped successfully.")
         else:
             print(f"Column '{column_name}' not found in the data.")
+        return self
 
     def select_features_for_model_training(self, suggested_features: list):
         final_features = [column for column in suggested_features if column in self.data.columns]
         self.data = self.data[final_features]
+        return self
 
     def impute_missing_values(self, strategy='mean'):
         imputer = SimpleImputer(strategy=strategy)
         imputed_data = imputer.fit_transform(self.data)
         self.data = pd.DataFrame(imputed_data, columns=self.data.columns)
+        return self
 
     def process_non_numerical_features(self):
         non_numerical_columns = self.data.select_dtypes(include=['object']).columns
         for column in non_numerical_columns:
             self.data[column] = pd.to_numeric(self.data[column], errors='coerce')
+        return self
 
     def drop_constants(self):
         labels = self._get_labels_and_drop_if_exists()
@@ -58,6 +64,7 @@ class DataPreprocessor:
 
         if labels is not None:
             self.data['Label'] = labels
+        return self
 
     def scale_features(self):
         labels = self._get_labels_and_drop_if_exists()
@@ -68,6 +75,7 @@ class DataPreprocessor:
 
         if labels is not None:
             self.data['Label'] = labels
+        return self
 
     def dimensions(self):
         return self.data.shape
@@ -78,7 +86,7 @@ class DataPreprocessor:
     def summarize_data(self):
         if self.data is None:
             print("Data not loaded yet.")
-            return
+            return self
 
         print(f"Data Summary for file: {self.filepath}\n")
         print(f"Data Dimensions: {self.data.shape[0]} rows, {self.data.shape[1]} columns")

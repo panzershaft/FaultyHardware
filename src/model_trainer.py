@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score, roc_auc_score
 import xgboost as xgb
 
 
@@ -46,6 +46,9 @@ class ModelTrainer:
         print(f"\n{'Test Data Report':-^50}\n")
         print(classification_report(self.y_test, test_predictions))
         print(f"Accuracy: {accuracy_score(self.y_test, test_predictions)}")
+
+        print("Training AUC: %.2f" % roc_auc_score(self.y_train, model.predict_proba(self.X_train)[:, 1]))
+        print("Test AUC: %.2f" % roc_auc_score(self.y_test, model.predict_proba(self.X_test)[:, 1]))
         return train_predictions, test_predictions
 
     def cross_validate(self, model, cv=5):
@@ -55,34 +58,54 @@ class ModelTrainer:
         scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
         print(f"Cross-Validation Scores: {scores}")
         print(f"Mean Accuracy: {scores.mean()}")
+        print(f"No. of features: {len(self.data)}")
         return scores
 
-    def select_important_features(self, n_features=50):
+    # def select_important_features(self, n_features=50):
+    #     """
+    #     Selects top n_features based on importance from a RandomForest model.
+    #     """
+    #     if 'Label' not in self.data.columns:
+    #         raise ValueError("Target column 'Label' is not found in the data.")
+    #
+    #     X = self.data.drop(columns=['Label'])  # Excluding the target column
+    #     y = self.data['Label']  # Target column
+    #
+    #     model = RandomForestClassifier()
+    #     model.fit(X, y)
+    #
+    #     # Getting feature importances
+    #     feature_importances = model.feature_importances_
+    #
+    #     # Getting the indices of the top features
+    #     important_features_idx = feature_importances.argsort()[-n_features:][::-1]
+    #
+    #     # Getting names of the important features
+    #     important_features = [X.columns[i] for i in important_features_idx]
+    #
+    #     # Keeping only the important features along with the target column
+    #     self.data = self.data[important_features + ['Label']]
+    #
+    #     print(len(self.data.columns.tolist()))
+    def select_important_features(self, model, n_features=50):
         """
         Selects top n_features based on importance from a RandomForest model.
         """
-        if 'Label' not in self.data.columns:
-            raise ValueError("Target column 'Label' is not found in the data.")
 
-        X = self.data.drop(columns=['Label'])  # Excluding the target column
-        y = self.data['Label']  # Target column
-
-        model = RandomForestClassifier()
-        model.fit(X, y)
-
-        # Getting feature importances
+        # Getting feature importance's
         feature_importances = model.feature_importances_
 
         # Getting the indices of the top features
         important_features_idx = feature_importances.argsort()[-n_features:][::-1]
 
         # Getting names of the important features
-        important_features = [X.columns[i] for i in important_features_idx]
+        important_features = [self.data.columns[i] for i in important_features_idx]
 
         # Keeping only the important features along with the target column
-        self.data = self.data[important_features + ['Label']]
+        self.data = self.data[important_features + [self.target_column]]
 
-        print(len(self.data.columns.tolist()))
+        print(f"Selected features: {important_features}")
+        print(f"No. of features: {len(important_features)}")
 
     # Feature Importance
     def feature_importance(self, model):
