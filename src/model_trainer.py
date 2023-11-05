@@ -16,6 +16,11 @@ class ModelTrainer:
         y = self.data[self.target_column]
         return train_test_split(X, y, test_size=0.3, random_state=42)
 
+    def _prepare_features_and_labels(self):
+        X = self.data.drop(columns=[self.target_column])
+        y = self.data[self.target_column]
+        return X, y
+
     def hyperparameter_tuning(self, model, param_grid):
         """
         Tune the model's hyperparameters using cross-validation.
@@ -53,8 +58,7 @@ class ModelTrainer:
 
     def cross_validate(self, model, cv=5):
         """Perform cross-validation."""
-        X = self.data.drop(columns=[self.target_column])
-        y = self.data[self.target_column]
+        X, y = self._prepare_features_and_labels()
         scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
         print(f"Cross-Validation Scores: {scores}")
         print(f"Mean Accuracy: {scores.mean()}")
@@ -87,11 +91,12 @@ class ModelTrainer:
     #     self.data = self.data[important_features + ['Label']]
     #
     #     print(len(self.data.columns.tolist()))
-    def select_important_features(self, model, n_features=50):
+    def select_important_features(self, n_features=50):
         """
         Selects top n_features based on importance from a RandomForest model.
         """
-
+        model = RandomForestClassifier()
+        model.fit(self.X_train, self.y_train)
         # Getting feature importance's
         feature_importances = model.feature_importances_
 
@@ -106,6 +111,8 @@ class ModelTrainer:
 
         print(f"Selected features: {important_features}")
         print(f"No. of features: {len(important_features)}")
+        print(f"No. of features: {len(self.data)}")
+        return model
 
     # Feature Importance
     def feature_importance(self, model):
