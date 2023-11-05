@@ -38,6 +38,9 @@ def run_model(model_name, train_func, extra_params, trainer, run_config):
     print(f"\n{model_name:=^50}\n")
 
     model = train_func(*extra_params) if extra_params else train_func()
+
+    if run_config.get("manual_feature_selection"):
+        trainer.select_important_features(model, run_config.get("no_of_features"))
     trainer.cross_validate(model)
     trainer.evaluate_model(model)
 
@@ -54,8 +57,6 @@ def run_experiment(file_path, run_config):
     trainer = ModelTrainer(preprocessor.data, 'Label')
 
     models_to_run = [('Random Forest', 'random_forest_basic', trainer.train_random_forest, None),
-                     ('Random Forest feature selector', 'manual_feature_selection', trainer.select_important_features
-                      , run_config.get("no_of_features")),
                      ('Tuned Random Forest', 'random_forest_tuned', trainer.hyperparameter_tuning,
                       (trainer.train_random_forest(), run_config.get("random_forest_hyper_parameters"))),
                      ('XGBoost', 'xgboost_basic', trainer.train_xgboost, None)]
@@ -72,7 +73,7 @@ def run_experiment(file_path, run_config):
 run_config = {
     "describe_data": False,
     "manual_feature_selection": True,  # will run Random forest with feature selection
-    "no_of_features": {53},
+    "no_of_features": 60,
     "random_forest_basic": True,
     "random_forest_tuned": False,
     "random_forest_hyper_parameters": {

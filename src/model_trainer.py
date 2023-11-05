@@ -91,12 +91,10 @@ class ModelTrainer:
     #     self.data = self.data[important_features + ['Label']]
     #
     #     print(len(self.data.columns.tolist()))
-    def select_important_features(self, n_features=50):
+    def select_important_features(self, model, n_features=50):
         """
         Selects top n_features based on importance from a RandomForest model.
         """
-        model = RandomForestClassifier()
-        model.fit(self.X_train, self.y_train)
         # Getting feature importance's
         feature_importances = model.feature_importances_
 
@@ -111,7 +109,6 @@ class ModelTrainer:
 
         print(f"Selected features: {important_features}")
         print(f"No. of features: {len(important_features)}")
-        print(f"No. of features: {len(self.data)}")
         return model
 
     # Feature Importance
