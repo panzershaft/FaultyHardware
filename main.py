@@ -13,7 +13,7 @@ def run_model(model_name, train_func, extra_params, trainer, run_config):
 
     if run_config.get("manual_feature_selection"):
         print("\n--- Selecting Important Features ---\n")
-        trainer.manual_feature_selection(model)
+        trainer.select_important_features(model)
 
     trainer.cross_validate(model)
     trainer.evaluate_model(model)
@@ -33,8 +33,10 @@ def run_experiment(file_path, run_config):
     # Data Preprocessing
     preprocessor = DataPreprocessor(file_path)
     preprocessor.load_data()
-    if not run_config.get('No. of features'):
+    if not run_config.get('manual_feature_selection'):
         preprocessor.select_features_for_model_training(suggested_features)
+    else:
+        preprocessor.drop_column('ComplaintID')
     preprocessor.drop_empty_rows_and_columns()
     preprocessor.process_non_numerical_features()
     preprocessor.impute_missing_values()
