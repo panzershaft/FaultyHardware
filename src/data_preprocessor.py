@@ -60,7 +60,9 @@ class DataPreprocessor:
         labels = self._get_labels_and_drop_if_exists()
 
         selector = VarianceThreshold()
-        self.data = pd.DataFrame(selector.fit_transform(self.data))
+        # Use the original column names when creating the new DataFrame
+        self.data = pd.DataFrame(selector.fit_transform(self.data),
+                                 columns=self.data.columns[selector.get_support(indices=True)])
 
         if labels is not None:
             self.data['Label'] = labels
