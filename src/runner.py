@@ -40,6 +40,11 @@ def run_experiment(file_path, run_config):
      .scale_features('robust')
      )
 
+    if run_config.get('manual_feature_selection'):
+        (preprocessor.handle_outliers()
+         .drop_constants()
+         .select_features())
+
     if run_config.get("describe_data"):
         preprocessor.summarize_data()
 
@@ -62,7 +67,7 @@ def run_experiment(file_path, run_config):
 # Configuration for the experiment
 run_config = {
     "describe_data": False,
-    "manual_feature_selection": False,  # will run Random forest with feature selection
+    "manual_feature_selection": True,  # will run Random forest with feature selection
     "apply_pca": False,
     "no_of_features": 100,
     "random_forest_basic": True,
