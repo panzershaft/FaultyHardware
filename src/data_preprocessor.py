@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
+from sklearn.decomposition import PCA
 from sklearn.impute import SimpleImputer
 from sklearn.feature_selection import VarianceThreshold, SelectKBest, f_classif
 from sklearn.preprocessing import StandardScaler, RobustScaler
@@ -54,13 +55,13 @@ class DataPreprocessor:
         self.data = self.data[final_features]
         return self
 
-    def select_features(self):
+    def select_features(self, n_features=50):
         if 'Label' in self.data.columns:
             # Separate features and target variable
             X = self.data.drop('Label', axis=1)
             y = self.data['Label']
 
-            selector = SelectKBest(f_classif, k=50)  # Adjust 'k' based on model performance
+            selector = SelectKBest(f_classif, k=n_features)  # Adjust 'k' based on model performance
             X_new = selector.fit_transform(X, y)
             selected_columns = X.columns[selector.get_support()]
             self.data = pd.DataFrame(X_new, columns=selected_columns)
@@ -103,6 +104,19 @@ class DataPreprocessor:
             raise ValueError("Invalid scaler type")
         self.data = pd.DataFrame(scaler.fit_transform(self.data), columns=self.data.columns)
 
+        if labels is not None:
+            self.data['Label'] = labels
+        return self
+
+    # Doesn't seem much useful for our case, performance degrades post PCA
+    def apply_pca(self, n_components=10):
+        """
+        Apply PCA to reduce dimensionality.
+        :param n_components: Number of components to keep.
+        """
+        labels = self._get_labels_and_drop_if_exists()
+        pca = PCA(n_components=n_components)
+        self.data = pd.DataFrame(pca.fit_transform(self.data), columns=self.data.columns[:n_components])
         if labels is not None:
             self.data['Label'] = labels
         return self

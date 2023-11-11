@@ -40,13 +40,21 @@ def run_experiment(file_path, run_config):
      .scale_features('robust')
      )
 
+    if run_config.get("describe_data"):
+        preprocessor.summarize_data()
+    # Suggested_features: 96%
+    # 50 features: 88% accuracy
+    # 55 features: 90% accuracy
+    # 60 features: 91% accuracy
+    # 61 features: 87% accuracy
+    # 69 features: 88% accuracy
+    # 75 features: 91% accuracy
+    # 100 features: 93% accuracy
     if run_config.get('manual_feature_selection'):
         (preprocessor.handle_outliers()
          .drop_constants()
-         .select_features())
-
-    if run_config.get("describe_data"):
-        preprocessor.summarize_data()
+         # .apply_pca(204)
+         .select_features(100))
 
     # Model Training and Evaluation
     trainer = ModelTrainer(preprocessor.data, 'Label')
@@ -66,7 +74,7 @@ def run_experiment(file_path, run_config):
 
 # Configuration for the experiment
 run_config = {
-    "describe_data": False,
+    "describe_data": True,
     "manual_feature_selection": True,  # will run Random forest with feature selection
     "apply_pca": False,
     "no_of_features": 100,
