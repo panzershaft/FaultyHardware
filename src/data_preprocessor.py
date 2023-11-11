@@ -1,7 +1,8 @@
+import numpy as np
 import pandas as pd
-import logging
+from scipy.stats import stats
 from sklearn.impute import SimpleImputer
-from sklearn.feature_selection import VarianceThreshold
+from sklearn.feature_selection import VarianceThreshold, SelectKBest, f_classif
 from sklearn.preprocessing import StandardScaler
 
 
@@ -19,11 +20,11 @@ class DataPreprocessor:
     def load_data(self):
         try:
             self.data = pd.read_csv(self.filepath)
-            logging.info(f"Data loaded successfully from {self.filepath}")
+            print(f"Data loaded successfully from {self.filepath}")
         except FileNotFoundError:
-            logging.error(f"File not found: {self.filepath}")
+            print(f"File not found: {self.filepath}")
         except Exception as e:
-            logging.warning(f"Error occurred while loading the data: {e}")
+            print(f"Error occurred while loading the data: {e}")
         return self
 
     def drop_empty_rows_and_columns(self):
@@ -39,9 +40,33 @@ class DataPreprocessor:
             print(f"Column '{column_name}' not found in the data.")
         return self
 
+    def handle_outliers(self):
+        z_scores = np.abs(stats.zscore(self.data.select_dtypes(include=[np.number])))
+        threshold = 3  # Adjust based on domain knowledge
+        outliers = (z_scores > threshold)
+        median_values = self.data.median()
+        self.data[outliers] = np.nan
+        self.data.fillna(median_values, inplace=True)
+        return self
+
     def select_features_for_model_training(self, suggested_features: list):
         final_features = [column for column in suggested_features if column in self.data.columns]
         self.data = self.data[final_features]
+        return self
+
+    def select_features(self):
+        if 'Label' in self.data.columns:
+            # Separate features and target variable
+            X = self.data.drop('Label', axis=1)
+            y = self.data['Label']
+
+            selector = SelectKBest(f_classif, k=50)  # Adjust 'k' based on model performance
+            X_new = selector.fit_transform(X, y)
+            selected_columns = X.columns[selector.get_support()]
+            self.data = pd.DataFrame(X_new, columns=selected_columns)
+            self.data['Label'] = y
+        else:
+            print("Label column not found in the data.")
         return self
 
     def impute_missing_values(self, strategy='mean'):

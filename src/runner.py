@@ -1,37 +1,7 @@
-from src.config import suggested_features, FILE_MAPPING
+from src.config import suggested_features, FILE_MAPPING, sf2, selected_features
 from src.data_preprocessor import DataPreprocessor
 from src.data_visualizer import DataVisualizer
 from src.model_trainer import ModelTrainer
-
-
-def visualize_model_performance(trainer, model, model_name):
-    predictions = model.predict(trainer.X_test)
-    probabilities = model.predict_proba(trainer.X_test)[:, 1]
-    DataVisualizer.plot_confusion_matrix(trainer.y_test, predictions,
-                                         title=f'{model_name}-test')
-    DataVisualizer.plot_roc_curve(trainer.y_test, probabilities,
-                                  title=f'{model_name}-test')
-    DataVisualizer.plot_precision_recall_curve(trainer.y_test, probabilities,
-                                               title=f'{model_name}-test')
-
-
-def setup_and_preprocess_data(file_path, run_config):
-    # Data Preprocessing
-    preprocessor = DataPreprocessor(file_path)
-    preprocessor.load_data()
-    preprocessor.select_features_for_model_training(suggested_features) \
-        if not run_config.get('manual_feature_selection') else preprocessor.drop_column('ComplaintID')
-
-    (preprocessor.drop_empty_rows_and_columns()
-     .process_non_numerical_features()
-     .impute_missing_values()
-     .drop_constants()
-     .scale_features())
-
-    if run_config.get("describe_data"):
-        # print(preprocessor.describe())
-        preprocessor.summarize_data()
-    return preprocessor
 
 
 def run_model(model_name, train_func, extra_params, trainer, run_config):
@@ -39,19 +9,46 @@ def run_model(model_name, train_func, extra_params, trainer, run_config):
 
     model = train_func(*extra_params) if extra_params else train_func()
 
-    if run_config.get("manual_feature_selection"):
-        trainer.select_important_features(model, run_config.get("no_of_features"))
+    # if run_config.get("manual_feature_selection"):
+    #     trainer.select_important_features(model, run_config.get("no_of_features"))
+
     trainer.cross_validate(model)
     trainer.evaluate_model(model)
 
     if run_config.get('visualize'):
-        visualize_model_performance(trainer, model, model_name)
+        predictions = model.predict(trainer.X_test)
+        probabilities = model.predict_proba(trainer.X_test)[:, 1]
+        DataVisualizer.plot_confusion_matrix(trainer.y_test, predictions,
+                                             title=f'{model_name}-test')
+        DataVisualizer.plot_roc_curve(trainer.y_test, probabilities,
+                                      title=f'{model_name}-test')
+        DataVisualizer.plot_precision_recall_curve(trainer.y_test, probabilities,
+                                                   title=f'{model_name}-test')
 
 
 def run_experiment(file_path, run_config):
     print(f'\n{"=" * 20} START OF {file_path} DATASET EVALUATION {"=" * 20}\n')
 
-    preprocessor = setup_and_preprocess_data(file_path, run_config)
+    # Data Preprocessing
+    preprocessor = DataPreprocessor(file_path)
+    preprocessor.load_data()
+    preprocessor.select_features_for_model_training(selected_features) \
+        if not run_config.get('manual_feature_selection') else preprocessor.drop_column('ComplaintID')
+
+    (preprocessor.drop_empty_rows_and_columns()
+     .process_non_numerical_features()
+     .handle_outliers()
+     .impute_missing_values(strategy='mean')
+     .drop_constants()
+     .scale_features())
+
+    # Conditional execution of select_features
+    if run_config.get('manual_feature_selection'):
+        preprocessor.select_features()
+
+    if run_config.get("describe_data"):
+        # print(preprocessor.describe())
+        preprocessor.summarize_data()
 
     # Model Training and Evaluation
     trainer = ModelTrainer(preprocessor.data, 'Label')
@@ -72,8 +69,8 @@ def run_experiment(file_path, run_config):
 # Configuration for the experiment
 run_config = {
     "describe_data": False,
-    "manual_feature_selection": True,  # will run Random forest with feature selection
-    "no_of_features": 60,
+    "manual_feature_selection": False,  # will run Random forest with feature selection
+    "no_of_features": 100,
     "random_forest_basic": True,
     "random_forest_tuned": False,
     "random_forest_hyper_parameters": {
@@ -92,7 +89,7 @@ run_config = {
     "remove_unimportant_features": False,
     "xgboost_basic": False,
     "feature_importance": False,  # Set this to False if you don't want visualizations
-    "visualize": False  # Set this to False if you don't want visualizations
+    "visualize": True  # Set this to False if you don't want visualizations
 }
 
 # Running the experiment
