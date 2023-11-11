@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from scipy.stats import stats
+from scipy import stats
 from sklearn.impute import SimpleImputer
 from sklearn.feature_selection import VarianceThreshold, SelectKBest, f_classif
 from sklearn.preprocessing import StandardScaler, RobustScaler
