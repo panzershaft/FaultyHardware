@@ -30,25 +30,17 @@ def run_experiment(file_path, run_config):
     print(f'\n{"=" * 20} START OF {file_path} DATASET EVALUATION {"=" * 20}\n')
 
     # Data Preprocessing
-    preprocessor = DataPreprocessor(file_path)
-    preprocessor.load_data()
-    preprocessor.select_features_for_model_training(selected_features) \
+    preprocessor = DataPreprocessor(file_path).load_data()
+    preprocessor.select_features_for_model_training(suggested_features) \
         if not run_config.get('manual_feature_selection') else preprocessor.drop_column('ComplaintID')
-
     (preprocessor.drop_empty_rows_and_columns()
      .process_non_numerical_features()
      .handle_outliers()
-     .impute_missing_values(strategy='mean')
-     .drop_constants()
-     .scale_features())
-
-    # Conditional execution of select_features
-    if run_config.get('manual_feature_selection'):
-        preprocessor.select_features()
-
-    if run_config.get("describe_data"):
-        # print(preprocessor.describe())
-        preprocessor.summarize_data()
+     .impute_missing_values()
+     .scale_features('robust')
+     )
+    # if run_config.get("describe_data"):
+    #     preprocessor.summarize_data()
 
     # Model Training and Evaluation
     trainer = ModelTrainer(preprocessor.data, 'Label')
@@ -70,26 +62,20 @@ def run_experiment(file_path, run_config):
 run_config = {
     "describe_data": False,
     "manual_feature_selection": False,  # will run Random forest with feature selection
+    "apply_pca": False,
     "no_of_features": 100,
     "random_forest_basic": True,
     "random_forest_tuned": False,
     "random_forest_hyper_parameters": {
         # parameter set 1
-        # 'n_estimators': [100, 200, 300],
-        # 'max_depth': [None, 10, 20, 30],
-        # 'min_samples_split': [2, 5, 10],
-        # 'min_samples_leaf': [1, 2, 4]
-        # parameter set 2
-        # 'n_estimators': [50, 100, 200, 500],
-        # 'max_depth': [None, 10, 20, 30, 50],
-        # 'min_samples_split': [2, 5, 10, 20],
-        # 'min_samples_leaf': [1, 2, 4, 8],
-        # 'bootstrap': [True, False]
+        'n_estimators': [50, 100, 200, 500],
+        'max_depth': [None, 10, 20, 30, 50],
+        'min_samples_split': [2, 5, 10, 20],
+        'min_samples_leaf': [1, 2, 4, 8],
+        'bootstrap': [True, False]
     },
-    "remove_unimportant_features": False,
     "xgboost_basic": False,
-    "feature_importance": False,  # Set this to False if you don't want visualizations
-    "visualize": True  # Set this to False if you don't want visualizations
+    "visualize": False  # Set this to False if you don't want visualizations
 }
 
 # Running the experiment

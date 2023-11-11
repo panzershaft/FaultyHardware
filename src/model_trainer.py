@@ -90,32 +90,26 @@ class ModelTrainer:
         print((self.data.columns.tolist()))
         return important_features_names
 
-    @staticmethod
-    def predict(model, X):
-        return model.predict(X), model.predict_proba(X)[:, 1]
-
-    @staticmethod
-    def generate_report(y_true, y_pred, y_score, data_type):
-        print(f"\n{data_type} Data Report\n")
-        print(classification_report(y_true, y_pred))
-        print(f'Accuracy: {accuracy_score(y_true, y_pred):.4f}')
-        print(f'F1 Score: {f1_score(y_true, y_pred):.4f}')
-        print(f'Confusion Matrix:\n{confusion_matrix(y_true, y_pred)}')
-        print(f'{data_type} AUC: {roc_auc_score(y_true, y_score):.2f}')
-        print("\n" + "-" * 50 + "\n")
-
     def evaluate_model(self, model):
-        train_pred, train_score = self.predict(model, self.X_train)
-        self.generate_report(self.y_train, train_pred, train_score, "Training")
+        train_predictions = model.predict(self.X_train)
+        print(f"\n{'Training Data Report':-^50}\n")
+        print(classification_report(self.y_train, train_predictions))
+        print(f'Accuracy: {accuracy_score(self.y_train, train_predictions):.4f}')
+        print(f'F1 Score: {f1_score(self.y_train, train_predictions):.4f}')
+        print("Training AUC: %.2f" % roc_auc_score(self.y_train, model.predict_proba(self.X_train)[:, 1]))
 
-        test_pred, test_score = self.predict(model, self.X_test)
-        self.generate_report(self.y_test, test_pred, test_score, "Test")
-
-        return train_pred, test_pred
+        # Evaluating on Test Data
+        test_predictions = model.predict(self.X_test)
+        print(f"\n{'Test Data Report':-^50}\n")
+        print(classification_report(self.y_test, test_predictions))
+        print(f'Accuracy: {accuracy_score(self.y_test, test_predictions):.4f}')
+        print(f'F1 Score: {f1_score(self.y_test, test_predictions):.4f}')
+        print("Test AUC: %.2f" % roc_auc_score(self.y_test, model.predict_proba(self.X_test)[:, 1]))
 
     def cross_validate(self, model, cv=5):
+        """Perform cross-validation."""
         X, y = self._prepare_features_and_labels()
         scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
         print(f"Cross-Validation Scores: {scores}")
         print(f"Mean Accuracy: {scores.mean()}")
-        print(f"No. of features: {len(self.data.columns)}")
+        print(f"No. of features: {len(self.data)}")

@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.stats import stats
 from sklearn.impute import SimpleImputer
 from sklearn.feature_selection import VarianceThreshold, SelectKBest, f_classif
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
 
 
 class DataPreprocessor:
@@ -93,12 +93,15 @@ class DataPreprocessor:
             self.data['Label'] = labels
         return self
 
-    def scale_features(self):
+    def scale_features(self, scaler_type='standard'):
         labels = self._get_labels_and_drop_if_exists()
-
-        scaler = StandardScaler()
-        scaled_data = scaler.fit_transform(self.data)
-        self.data = pd.DataFrame(scaled_data, columns=self.data.columns)
+        if scaler_type == 'standard':
+            scaler = StandardScaler()
+        elif scaler_type == 'robust':
+            scaler = RobustScaler()
+        else:
+            raise ValueError("Invalid scaler type")
+        self.data = pd.DataFrame(scaler.fit_transform(self.data), columns=self.data.columns)
 
         if labels is not None:
             self.data['Label'] = labels
