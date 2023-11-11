@@ -39,8 +39,9 @@ def run_experiment(file_path, run_config):
      .impute_missing_values()
      .scale_features('robust')
      )
-    # if run_config.get("describe_data"):
-    #     preprocessor.summarize_data()
+
+    if run_config.get("describe_data"):
+        preprocessor.summarize_data()
 
     # Model Training and Evaluation
     trainer = ModelTrainer(preprocessor.data, 'Label')
