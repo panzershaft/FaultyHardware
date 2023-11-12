@@ -55,7 +55,7 @@ def run_experiment(file_path, run_config):
         (preprocessor.handle_outliers()
          .drop_constants()
          # .apply_pca(204)
-         .select_features(100))
+         .manual_feature_select(100))
 
     # Model Training and Evaluation
     trainer = ModelTrainer(preprocessor.data, 'Label')

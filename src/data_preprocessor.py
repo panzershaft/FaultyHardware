@@ -50,12 +50,12 @@ class DataPreprocessor:
         self.data.fillna(median_values, inplace=True)
         return self
 
-    def select_features_for_model_training(self, suggested_features: list):
+    def manual_feature_select_for_model_training(self, suggested_features: list):
         final_features = [column for column in suggested_features if column in self.data.columns]
         self.data = self.data[final_features]
         return self
 
-    def select_features(self, n_features=50):
+    def manual_feature_select(self, n_features=50):
         if 'Label' in self.data.columns:
             # Separate features and target variable
             X = self.data.drop('Label', axis=1)
