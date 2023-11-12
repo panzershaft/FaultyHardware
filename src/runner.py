@@ -35,6 +35,7 @@ def run_experiment(file_path, run_config):
         if not run_config.get('manual_feature_selection') else preprocessor.drop_column('ComplaintID')
     (preprocessor.drop_empty_rows_and_columns()
      .process_non_numerical_features()
+     .show_data_imbalance()
      .handle_outliers()
      .impute_missing_values()
      .scale_features('robust')
@@ -93,7 +94,7 @@ run_config = {
         'bootstrap': [True, False]
     },
     "xgboost_basic": False,
-    "xgboost_tuned": True,
+    "xgboost_tuned": False,
     "xgboot_hyper_parameters": {
         'max_depth': [3, 6, 10],
         'learning_rate': [0.01, 0.1, 0.3],
@@ -103,9 +104,9 @@ run_config = {
         'reg_alpha': [0, 0.1, 1],
         'reg_lambda': [1, 1.1, 1.2]
     },
-    "visualize": True  # Set this to False if you don't want visualizations
+    "visualize": False  # Set this to False if you don't want visualizations
 }
 
 # Running the experiment
-# run_experiment(FILE_MAPPING["file1"], run_config)
-run_experiment(FILE_MAPPING["file2"], run_config)
+run_experiment(FILE_MAPPING["file1"], run_config)
+# run_experiment(FILE_MAPPING["file2"], run_config)

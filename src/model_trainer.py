@@ -1,9 +1,12 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV, StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score, roc_auc_score, f1_score, confusion_matrix
+from sklearn.metrics import classification_report, accuracy_score, roc_auc_score, f1_score
 import xgboost as xgb
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.pipeline import Pipeline
 
 
 class ModelTrainer:
@@ -19,6 +22,9 @@ class ModelTrainer:
 
     def split_data(self):
         X, y = self._prepare_features_and_labels()
+        # Using SMOTE to address the data-imbalance
+        smote = SMOTE()
+        X, y = smote.fit_resample(X, y)
         return train_test_split(X, y, test_size=0.3, random_state=42)
 
     def train_model(self, model):
@@ -26,16 +32,12 @@ class ModelTrainer:
         return model
 
     def train_random_forest(self):
-        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
         return self.train_model(model)
 
     def train_xgboost(self):
         model = xgb.XGBClassifier()
-        # model = xgb.XGBClassifier(max_depth=10,
-        #                           eta=0.3,
-        #                           silent=1,
-        #                           objective='binary:logistic',
-        #                           num_round=20,
+        # model = xgb.XGBClassifier(max_depth=10, eta=0.3, silent=1, objective='binary:logistic', num_round=20,
         #                           random_state=1)
         return self.train_model(model)
 
@@ -115,7 +117,8 @@ class ModelTrainer:
     def cross_validate(self, model, cv=5):
         """Perform cross-validation."""
         X, y = self._prepare_features_and_labels()
-        scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
+        stratified_kfold = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
+        scores = cross_val_score(model, X, y, cv=stratified_kfold, scoring='accuracy')
         print(f"Cross-Validation Scores: {scores}")
         print(f"Mean Accuracy: {scores.mean()}")
         print(f"No. of features: {len(self.data)}")

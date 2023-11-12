@@ -82,6 +82,13 @@ class DataPreprocessor:
             self.data[column] = pd.to_numeric(self.data[column], errors='coerce')
         return self
 
+    def show_data_imbalance(self):
+        class_counts = self.data['Label'].value_counts()
+        print(class_counts)
+        balance_ratio = class_counts.min() / class_counts.max()
+        print(f'Balance Ratio: {balance_ratio:.2f}')
+        return self
+
     def drop_constants(self):
         labels = self._get_labels_and_drop_if_exists()
 
