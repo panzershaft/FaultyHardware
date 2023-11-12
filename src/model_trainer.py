@@ -31,6 +31,12 @@ class ModelTrainer:
 
     def train_xgboost(self):
         model = xgb.XGBClassifier()
+        # model = xgb.XGBClassifier(max_depth=10,
+        #                           eta=0.3,
+        #                           silent=1,
+        #                           objective='binary:logistic',
+        #                           num_round=20,
+        #                           random_state=1)
         return self.train_model(model)
 
     def hyperparameter_tuning(self, model, param_grid):

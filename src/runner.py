@@ -59,10 +59,14 @@ def run_experiment(file_path, run_config):
     # Model Training and Evaluation
     trainer = ModelTrainer(preprocessor.data, 'Label')
 
-    models_to_run = [('Random Forest', 'random_forest_basic', trainer.train_random_forest, None),
-                     ('Tuned Random Forest', 'random_forest_tuned', trainer.hyperparameter_tuning,
-                      (trainer.train_random_forest(), run_config.get("random_forest_hyper_parameters"))),
-                     ('XGBoost', 'xgboost_basic', trainer.train_xgboost, None)]
+    models_to_run = [
+        ('Random Forest', 'random_forest_basic', trainer.train_random_forest, None),
+        ('Tuned Random Forest', 'random_forest_tuned', trainer.hyperparameter_tuning,
+         (trainer.train_random_forest(), run_config.get("random_forest_hyper_parameters"))),
+        ('XGBoost', 'xgboost_basic', trainer.train_xgboost, None),
+        ('Tuned XGBoost', 'xgboost_tuned', trainer.hyperparameter_tuning,
+         (trainer.train_xgboost(), run_config.get("xgboot_hyper_parameters")))
+    ]
 
     for model_name, config_key, train_func, extra_params in models_to_run:
         if run_config.get(config_key):
@@ -74,8 +78,8 @@ def run_experiment(file_path, run_config):
 
 # Configuration for the experiment
 run_config = {
-    "describe_data": True,
-    "manual_feature_selection": True,  # will run Random forest with feature selection
+    "describe_data": False,
+    "manual_feature_selection": False,  # will run Random forest with feature selection
     "apply_pca": False,
     "no_of_features": 100,
     "random_forest_basic": True,
@@ -89,9 +93,19 @@ run_config = {
         'bootstrap': [True, False]
     },
     "xgboost_basic": False,
-    "visualize": False  # Set this to False if you don't want visualizations
+    "xgboost_tuned": True,
+    "xgboot_hyper_parameters": {
+        'max_depth': [3, 6, 10],
+        'learning_rate': [0.01, 0.1, 0.3],
+        'n_estimators': [100, 200, 300],
+        'subsample': [0.7, 0.8, 1],
+        'colsample_bytree': [0.7, 0.8, 1],
+        'reg_alpha': [0, 0.1, 1],
+        'reg_lambda': [1, 1.1, 1.2]
+    },
+    "visualize": True  # Set this to False if you don't want visualizations
 }
 
 # Running the experiment
-run_experiment(FILE_MAPPING["file1"], run_config)
-# run_experiment(FILE_MAPPING["file2"], run_config)
+# run_experiment(FILE_MAPPING["file1"], run_config)
+run_experiment(FILE_MAPPING["file2"], run_config)
