@@ -50,7 +50,7 @@ class DataPreprocessor:
         self.data.fillna(median_values, inplace=True)
         return self
 
-    def manual_feature_select_for_model_training(self, suggested_features: list):
+    def select_features_for_model_training(self, suggested_features: list):
         final_features = [column for column in suggested_features if column in self.data.columns]
         self.data = self.data[final_features]
         return self
