@@ -43,14 +43,6 @@ def run_experiment(file_path, run_config):
 
     if run_config.get("describe_data"):
         preprocessor.summarize_data()
-    # Suggested_features: 96%
-    # 50 features: 88% accuracy
-    # 55 features: 90% accuracy
-    # 60 features: 91% accuracy
-    # 61 features: 87% accuracy
-    # 69 features: 88% accuracy
-    # 75 features: 91% accuracy
-    # 100 features: 93% accuracy
     if run_config.get('manual_feature_selection'):
         (preprocessor.handle_outliers()
          .drop_constants()
@@ -80,10 +72,10 @@ def run_experiment(file_path, run_config):
 # Configuration for the experiment
 run_config = {
     "describe_data": False,
-    "manual_feature_selection": False,  # will run Random forest with feature selection
+    "manual_feature_selection": False,  # For manual feature selection
     "apply_pca": False,
     "no_of_features": 100,
-    "random_forest_basic": True,
+    "random_forest_basic": False,
     "random_forest_tuned": False,
     "random_forest_hyper_parameters": {
         # parameter set 1
@@ -93,20 +85,28 @@ run_config = {
         'min_samples_leaf': [1, 2, 4, 8],
         'bootstrap': [True, False]
     },
-    "xgboost_basic": False,
-    "xgboost_tuned": False,
+    "xgboost_basic": True,
+    "xgboost_tuned": True,
     "xgboot_hyper_parameters": {
-        'max_depth': [3, 6, 10],
-        'learning_rate': [0.01, 0.1, 0.3],
-        'n_estimators': [100, 200, 300],
-        'subsample': [0.7, 0.8, 1],
-        'colsample_bytree': [0.7, 0.8, 1],
-        'reg_alpha': [0, 0.1, 1],
-        'reg_lambda': [1, 1.1, 1.2]
+        # Parameter set one
+        # 'max_depth': [3, 6, 10],
+        # 'learning_rate': [0.01, 0.1, 0.3],
+        # 'n_estimators': [100, 200, 300],
+        # 'subsample': [0.7, 0.8, 1],
+        # 'colsample_bytree': [0.7, 0.8, 1],
+        # 'reg_alpha': [0, 0.1, 1],
+        # 'reg_lambda': [1, 1.1, 1.2]
+        'max_depth': [10],
+        'learning_rate': [0.1],
+        'n_estimators': [300],
+        'subsample': [0.8],
+        'colsample_bytree': [0.7],
+        'reg_alpha': [0],
+        'reg_lambda': [1.2]
     },
-    "visualize": False  # Set this to False if you don't want visualizations
+    "visualize": True  # Set this to False if you don't want visualizations
 }
 
 # Running the experiment
-run_experiment(FILE_MAPPING["file1"], run_config)
-# run_experiment(FILE_MAPPING["file2"], run_config)
+# run_experiment(FILE_MAPPING["file1"], run_config)
+run_experiment(FILE_MAPPING["file2"], run_config)

@@ -45,8 +45,12 @@ class ModelTrainer:
         """
         Tune the model's hyperparameters using cross-validation.
         """
-        grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring='accuracy', n_jobs=-1)
+        grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5,
+                                   scoring='roc_auc', n_jobs=-1)
         grid_search.fit(self.X_train, self.y_train)
+        print("Best score: %0.3f" % grid_search.best_score_)
+        print("Best parameters set:", grid_search.best_params_)
+        print("Best parameters estimator:", grid_search.best_estimator_)
         return grid_search.best_estimator_
 
     def select_important_features(self, model, n_features=50):
