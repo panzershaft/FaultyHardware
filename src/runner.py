@@ -9,9 +9,6 @@ def run_model(model_name, train_func, extra_params, trainer, run_config):
 
     model = train_func(*extra_params) if extra_params else train_func()
 
-    # if run_config.get("manual_feature_selection"):
-    #     trainer.select_important_features(model, run_config.get("no_of_features"))
-
     trainer.cross_validate(model)
     trainer.evaluate_model(model)
 
@@ -47,7 +44,7 @@ def run_experiment(file_path, run_config):
         (preprocessor.handle_outliers()
          .drop_constants()
          # .apply_pca(204)
-         .manual_feature_select(100))
+         .manual_feature_select(run_config['no_of_features']))
 
     # Model Training and Evaluation
     trainer = ModelTrainer(preprocessor.data, 'Label')
@@ -104,9 +101,10 @@ run_config = {
         'reg_alpha': [0],
         'reg_lambda': [1.2]
     },
-    "visualize": True  # Set this to False if you don't want visualizations
+    "visualize": False  # Set this to False if you don't want visualizations
 }
 
 # Running the experiment
 # run_experiment(FILE_MAPPING["file1"], run_config)
 run_experiment(FILE_MAPPING["file2"], run_config)
+# run_experiment(FILE_MAPPING["file3"], run_config)

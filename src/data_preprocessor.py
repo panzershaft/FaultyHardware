@@ -128,6 +128,9 @@ class DataPreprocessor:
             self.data['Label'] = labels
         return self
 
+    def show_data_types(self):
+        return self.data.dtypes
+
     def dimensions(self):
         return self.data.shape
 
