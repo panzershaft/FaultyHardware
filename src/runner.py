@@ -9,10 +9,7 @@ from src.visualizing.data_visualizer import DataVisualizer
 def run_model(model_name, model_trainer, param_grid, run_config):
     model = model_trainer
     print(f"\n{model_name:=^50}\n")
-    if param_grid:
-        model.hyperparameter_tuning(param_grid)
-    else:
-        model.train()
+    model.hyperparameter_tuning(param_grid) if param_grid else model.train()
     model.get_model_cross_validation()
     model.get_model_evaluation()
 
@@ -34,7 +31,7 @@ def run_experiment(file_path, run_config):
     preprocessor = DataPreprocessor(file_path, run_config.get('enable_SMOTE'), 'Label')
     preprocessor.select_features_for_model_training(suggested_features) \
         if not run_config.get('manual_feature_selection') else preprocessor.drop_column('ComplaintID')
-    (preprocessor.process_data())
+    preprocessor.process_data()
 
     if run_config.get("describe_data"):
         preprocessor.summarize_data()
@@ -43,17 +40,17 @@ def run_experiment(file_path, run_config):
          .drop_constants()
          # .apply_pca(204)
          .manual_feature_select(run_config['no_of_features']))
-    X, y = preprocessor.address_data_imbalance()
-    X_train, X_test, y_train, y_test = preprocessor.split_data()
 
     models_to_run = [
         ('Random Forest', 'random_forest_basic',
-         ModelTrainer(RandomForestModel(), X, y, X_train, X_test, y_train, y_test), None),
+         ModelTrainer(RandomForestModel(), *preprocessor.address_data_imbalance(), *preprocessor.split_data()), None),
         ('Tuned Random Forest', 'random_forest_tuned',
-         ModelTrainer(RandomForestModel(), X, y, X_train, X_test, y_train, y_test),
+         ModelTrainer(RandomForestModel(), *preprocessor.address_data_imbalance(), *preprocessor.split_data()),
          run_config.get("random_forest_hyper_parameters")),
-        ('XGBoost', 'xgboost_basic', ModelTrainer(XGBoostModel(), X, y, X_train, X_test, y_train, y_test), None),
-        ('Tuned XGBoost', 'xgboost_tuned', ModelTrainer(XGBoostModel(), X, y, X_train, X_test, y_train, y_test),
+        ('XGBoost', 'xgboost_basic', ModelTrainer(XGBoostModel(), *preprocessor.address_data_imbalance(),
+                                                  *preprocessor.split_data()), None),
+        ('Tuned XGBoost', 'xgboost_tuned', ModelTrainer(XGBoostModel(), *preprocessor.address_data_imbalance(),
+                                                        *preprocessor.split_data()),
          run_config.get("xgboot_hyper_parameters")),
     ]
 
@@ -93,7 +90,7 @@ run_config = {
         'reg_alpha': [0],
         'reg_lambda': [1.2]
     },
-    "visualize": True  # Set this to False if you don't want visualizations
+    "visualize": False  # Set this to False if you don't want visualizations
 }
 
 # Running the experiment
