@@ -159,9 +159,10 @@ class DataPreprocessor:
             X, y = self._prepare_features_and_labels()
         return X, y
 
-    def split_data(self):
+    def split_data(self, startify=None):
         X, y = self.get_features_and_labels()
-        return train_test_split(X, y, test_size=0.3, random_state=42)
+        return train_test_split(X, y, test_size=0.3, random_state=42,
+                                startify=startify)
 
     def show_data_types(self):
         return self.data.dtypes
