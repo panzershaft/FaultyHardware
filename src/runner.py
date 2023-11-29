@@ -1,4 +1,5 @@
 from src.config import suggested_features, FILE_MAPPING
+from src.models.neural_net_model import NeuralNetwork
 from src.models.random_forest_model import RandomForestModel
 from src.models.xgboost_model import XGBoostModel
 from src.preprocessing.data_preprocessor import DataPreprocessor
@@ -9,11 +10,13 @@ from src.visualizing.data_visualizer import DataVisualizer
 def run_model(model_name, model_trainer, param_grid, run_config):
     model = model_trainer
     print(f"\n{model_name:=^50}\n")
+    if run_config.get('neural_net'):
+        model.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'], run_eagerly=True)
     model.hyperparameter_tuning(param_grid) if param_grid else model.train()
     model.get_model_cross_validation()
     model.get_model_evaluation()
 
-    if run_config.get('visualize'):
+    if run_config.get('visualize') and not run_config.get('neural_net'):
         predictions = model.model.get_model().predict(model.X_test)
         probabilities = model.model.get_model().predict_proba(model.X_test)[:, 1]
         DataVisualizer.plot_confusion_matrix(model.y_test, predictions,
@@ -52,6 +55,14 @@ def run_experiment(file_path, run_config):
         ('Tuned XGBoost', 'xgboost_tuned', ModelTrainer(XGBoostModel(), *preprocessor.address_data_imbalance(),
                                                         *preprocessor.split_data()),
          run_config.get("xgboot_hyper_parameters")),
+        ('Neural Network', 'neural_net', ModelTrainer(
+            NeuralNetwork(run_config.get('no_of_features'), 'relu',
+                          2,
+                          [165, 330],
+                          1,
+                          'sigmoid'),
+            *preprocessor.address_data_imbalance(),
+            *preprocessor.split_data_with_startify()), None)
     ]
 
     for model_name, config_key, model_trainer, param_grid in models_to_run:
@@ -90,6 +101,7 @@ run_config = {
         'reg_alpha': [0],
         'reg_lambda': [1.2]
     },
+    "neural_net": False,
     "visualize": False  # Set this to False if you don't want visualizations
 }
 
