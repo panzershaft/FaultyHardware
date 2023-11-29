@@ -44,12 +44,33 @@ from fault_hardware_model import run_experiment
 
 file_path = "path_to_your_dataset.csv"
 run_config = {
-    "describe_data": True,
+    "describe_data": False,
+    "enable_SMOTE": True,
+    "manual_feature_selection": True,  # For manual feature selection
+    "apply_pca": False,
+    "no_of_features": 100,
     "random_forest_basic": True,
-    "random_forest_tuned": True,
+    "random_forest_tuned": False,
+    "random_forest_hyper_parameters": {
+        'n_estimators': [50, 100, 200, 500],
+        'max_depth': [None, 10, 20, 30, 50],
+        'min_samples_split': [2, 5, 10, 20],
+        'min_samples_leaf': [1, 2, 4, 8],
+        'bootstrap': [True, False]
+    },
     "xgboost_basic": True,
-    "feature_importance": True,
-    "visualize": True
+    "xgboost_tuned": True,
+    "xgboot_hyper_parameters": {
+        'max_depth': [10],
+        'learning_rate': [0.1],
+        'n_estimators': [300],
+        'subsample': [0.8],
+        'colsample_bytree': [0.7],
+        'reg_alpha': [0],
+        'reg_lambda': [1.2]
+    },
+    "neural_net": False,
+    "visualize": False  # Set this to False if you don't want visualizations
 }
 
 run_experiment(file_path, run_config)
