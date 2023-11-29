@@ -1,16 +1,29 @@
 import numpy as np
 import pandas as pd
+from imblearn.over_sampling import SMOTE
 from scipy import stats
 from sklearn.decomposition import PCA
 from sklearn.impute import SimpleImputer
 from sklearn.feature_selection import VarianceThreshold, SelectKBest, f_classif
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
 
 class DataPreprocessor:
-    def __init__(self, filepath: str):
+    def __init__(self, filepath: str, address_imbalance: bool, target_column: str):
         self.filepath = filepath
-        self.data = None
+        self.data = self.load_data()
+        self.address_imbalance = address_imbalance
+        self.target_column = target_column
+
+    def process_data(self):
+        # Apply all preprocessing steps
+        (self.drop_empty_rows_and_columns()
+         .process_non_numerical_features()
+         .show_data_imbalance()
+         .handle_outliers()
+         .impute_missing_values()
+         .scale_features('robust'))
 
     def _get_labels_and_drop_if_exists(self):
         labels = None
@@ -22,6 +35,7 @@ class DataPreprocessor:
         try:
             self.data = pd.read_csv(self.filepath)
             print(f"Data loaded successfully from {self.filepath}")
+            return self.data
         except FileNotFoundError:
             print(f"File not found: {self.filepath}")
         except Exception as e:
@@ -84,7 +98,6 @@ class DataPreprocessor:
 
     def show_data_imbalance(self):
         class_counts = self.data['Label'].value_counts()
-        print(class_counts)
         balance_ratio = class_counts.min() / class_counts.max()
         print(f'Balance Ratio: {balance_ratio:.2f}')
         return self
@@ -127,6 +140,28 @@ class DataPreprocessor:
         if labels is not None:
             self.data['Label'] = labels
         return self
+
+    def _prepare_features_and_labels(self):
+        X = self.data.drop(columns=[self.target_column])
+        y = self.data[self.target_column]
+        return X, y
+
+    def address_data_imbalance(self):
+        X, y = self._prepare_features_and_labels()
+        smote = SMOTE()
+        X, y = smote.fit_resample(X, y)
+        return X, y
+
+    def get_features_and_labels(self):
+        if self.address_imbalance:
+            X, y = self.address_data_imbalance()
+        else:
+            X, y = self._prepare_features_and_labels()
+        return X, y
+
+    def split_data(self):
+        X, y = self.get_features_and_labels()
+        return train_test_split(X, y, test_size=0.3, random_state=42)
 
     def show_data_types(self):
         return self.data.dtypes

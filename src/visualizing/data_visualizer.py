@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve
+from xgboost import plot_tree
 
 
 class DataVisualizer:
@@ -35,4 +36,10 @@ class DataVisualizer:
         plt.xlabel('Recall')
         plt.ylabel('Precision')
         plt.title(title)
+        plt.show()
+
+    @staticmethod
+    def plot_the_tree_model(model):
+        # Plot the first tree
+        plot_tree(model, num_trees=0)
         plt.show()
