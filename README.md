@@ -13,7 +13,7 @@ and data visualization techniques to assess model performance and insights.
 - The data set is confidential hence not provided.
 - The suggested_features are also confidentiial and not provided.
 
-## ML Pipelines
+## ML Pipeline
 
 1. **Data Preprocessing** (`DataPreprocessor` Class)
    - Loading data from a CSV file.
