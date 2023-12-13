@@ -13,7 +13,7 @@ and data visualization techniques to assess model performance and insights.
 - The data set is confidential hence not provided.
 - The suggested_features are also confidentiial and not provided.
 
-## Process Pipelines
+## ML Pipelines
 
 1. **Data Preprocessing** (`DataPreprocessor` Class)
    - Loading data from a CSV file.
@@ -31,10 +31,31 @@ and data visualization techniques to assess model performance and insights.
    - Precision-Recall Curve plotting.
 
 3. **Model Training** (`ModelTrainer` Class)
-   - Splitting data into training and test sets.
+   - Facilitates training of machine learning models.
+   - Implements hyperparameter tuning using GridSearchCV.
+   - Provides functions for evaluating the trained model on training and test data.
+   - Supports cross-validation for model evaluation.
+
+4. **Base Model Interface** (`BaseModelInterface` ABC Class)
+   - Template for creating machine learning models
+   - Train and make predictions with the model using the provided training data.
+   - Retrieve the underlying machine learning model.
+   - Evaluate the performance of the model
+
+5. **Random Forest Training** (`RandomForestModel` Class)
+   - Model training using various algorithms using Random Forest.
    - Hyperparameter tuning using cross-validation.
-   - Model training using various algorithms such as Random Forest and XGBoost.
    - Model evaluation and feature importance analysis.
+
+6. **XGBoost Training** (`XGBoostModel` Class)
+   - Model training using various algorithms using Random Forest.
+   - Hyperparameter tuning using cross-validation.
+   - Model evaluation and feature importance analysis.
+
+7. **Neural Network Training** (`NeuralNetwork` Class)
+   - Setting up the NN, define hidden layers, no. of Neurons.
+   - Compile and train the NN.
+   - Predict and evaluate the model.
 
 ![Alt text](/images/xgboost-test-scores.png "XGBoost test scores")
 
