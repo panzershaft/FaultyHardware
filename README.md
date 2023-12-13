@@ -7,6 +7,7 @@ A comprehensive data preprocessing, visualization, and model training framework 
 This project comprises a systematic pipeline for handling, analyzing, and modeling data primarily aimed at fault detection in hardware systems i.e. Radio equipments. 
 It includes functionalities ranging from data preprocessing steps such as missing value imputation and feature scaling, to model training and evaluation with various machine learning algorithms, 
 and data visualization techniques to assess model performance and insights.
+![Alt text](/images/Faulty%20Hardware%20UML.png "UML")
 
 ## Note
 - The data set is confidential hence not provided.
@@ -35,6 +36,9 @@ and data visualization techniques to assess model performance and insights.
    - Model training using various algorithms such as Random Forest and XGBoost.
    - Model evaluation and feature importance analysis.
 
+![Alt text](/images/xgboost-test-scores.png "XGBoost test scores")
+
+![Alt text](/images/xgboost-roc-auc.png "XGBoost ROC-AUC ")
 ## Usage
 
 Here is a simple way to run the experiment:
