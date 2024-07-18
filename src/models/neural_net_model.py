@@ -6,11 +6,11 @@ from keras.src.layers import Dense
 
 
 class NeuralNetwork(BaseModelInterface):
-    def __init__(self, no_of_input_layer_neurons: int, hidden_layer_activation_func: str,
-                 no_of_hidden_layers: int,
-                 no_of_hidden_layers_neurons_list: [int],
-                 no_of_outer_layer_neurons: int,
-                 output_layer_activation_func: str):
+    def __init__(self, no_of_input_layer_neurons, hidden_layer_activation_func,
+                 no_of_hidden_layers,
+                 no_of_hidden_layers_neurons_list,
+                 no_of_outer_layer_neurons,
+                 output_layer_activation_func):
         self.no_of_input_layer_neurons = no_of_input_layer_neurons
         self.hidden_layer_activation_func = hidden_layer_activation_func
         self.no_of_hidden_layers = no_of_hidden_layers

@@ -1,10 +1,35 @@
 from src.config import suggested_features, FILE_MAPPING
-from src.models.neural_net_model import NeuralNetwork
+# from src.models.neural_net_model import NeuralNetwork
 from src.models.random_forest_model import RandomForestModel
 from src.models.xgboost_model import XGBoostModel
 from src.preprocessing.data_preprocessor import DataPreprocessor
 from src.training.model_trainer import ModelTrainer
 from src.visualizing.data_visualizer import DataVisualizer
+
+
+class ModelFactory:
+    def __init__(self):
+        self.builders = {}
+
+    def register_model(self, model_name, model_class):
+        self.builders[model_name] = model_class
+
+    def create(self, model_name, **kwargs):
+        model_class = self.builders.get(model_name)
+        if not model_class:
+            raise ValueError(f"{model_name} is not present")
+        return model_class(**kwargs)
+
+    def __str__(self):
+        return f"Registered models: {list(self.builders.keys())}"
+
+
+def initialize_model_factory():
+    model_factory = ModelFactory()
+    model_factory.register_model('RandomForest', RandomForestModel)
+    model_factory.register_model('XGBoost', XGBoostModel)
+    # model_factory.register_model('NeuralNetwork', NeuralNetwork)
+    return model_factory
 
 
 def run_model(model_name, model_trainer, param_grid, run_config):
@@ -43,31 +68,34 @@ def run_experiment(file_path, run_config):
          .drop_constants()
          # .apply_pca(204)
          .manual_feature_select(run_config['no_of_features']))
+    model_factory = initialize_model_factory()
 
     models_to_run = [
-        ('Random Forest', 'random_forest_basic',
-         ModelTrainer(RandomForestModel(), *preprocessor.address_data_imbalance(), *preprocessor.split_data()), None),
-        ('Tuned Random Forest', 'random_forest_tuned',
-         ModelTrainer(RandomForestModel(), *preprocessor.address_data_imbalance(), *preprocessor.split_data()),
-         run_config.get("random_forest_hyper_parameters")),
-        ('XGBoost', 'xgboost_basic', ModelTrainer(XGBoostModel(), *preprocessor.address_data_imbalance(),
-                                                  *preprocessor.split_data()), None),
-        ('Tuned XGBoost', 'xgboost_tuned', ModelTrainer(XGBoostModel(), *preprocessor.address_data_imbalance(),
-                                                        *preprocessor.split_data()),
-         run_config.get("xgboot_hyper_parameters")),
-        ('Neural Network', 'neural_net', ModelTrainer(
-            NeuralNetwork(run_config.get('no_of_features'), 'relu',
-                          2,
-                          [165, 330],
-                          1,
-                          'sigmoid'),
-            *preprocessor.address_data_imbalance(),
-            *preprocessor.split_data_with_startify()), None)
+        ('Random Forest', 'random_forest_basic', 'RandomForest', None),
+        (
+        'Tuned Random Forest', 'random_forest_tuned', 'RandomForest', run_config.get("random_forest_hyper_parameters")),
+        ('XGBoost', 'xgboost_basic', 'XGBoost', None),
+        ('Tuned XGBoost', 'xgboost_tuned', 'XGBoost', run_config.get("xgboost_hyper_parameters")),
+        ('Neural Network', 'neural_net', 'NeuralNetwork', None)
     ]
 
-    for model_name, config_key, model_trainer, param_grid in models_to_run:
+    for model_name, config_key, model_type, param_grid in models_to_run:
         if run_config.get(config_key):
             print(f"Running {model_name}")
+            if model_type == 'NeuralNetwork':
+                model_instance = model_factory.create(
+                    model_type,
+                    input_dim=run_config.get('no_of_features'),
+                    activation='relu',
+                    num_layers=2,
+                    units_per_layer=[165, 330],
+                    output_units=1,
+                    output_activation='sigmoid'
+                )
+            else:
+                model_instance = model_factory.create(model_type)
+            model_trainer = ModelTrainer(model_instance, *preprocessor.address_data_imbalance(),
+                                         *preprocessor.split_data())
             run_model(model_name, model_trainer, param_grid, run_config)
 
     print(f'\n{"=" * 20} END OF {file_path} DATASET EVALUATION {"=" * 20}\n')
@@ -92,7 +120,7 @@ run_config = {
     },
     "xgboost_basic": True,
     "xgboost_tuned": True,
-    "xgboot_hyper_parameters": {
+    "xgboost_hyper_parameters": {
         'max_depth': [10],
         'learning_rate': [0.1],
         'n_estimators': [300],

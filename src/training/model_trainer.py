@@ -4,7 +4,7 @@ from src.models.base_model_interface import BaseModelInterface
 
 
 class ModelTrainer:
-    def __init__(self, model: BaseModelInterface, X, y, X_train, X_test, y_train, y_test):
+    def __init__(self, model, X, y, X_train, X_test, y_train, y_test):
         self.model = model
         self.X = X
         self.y = y

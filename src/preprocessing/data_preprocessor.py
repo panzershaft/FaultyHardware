@@ -10,14 +10,13 @@ from sklearn.preprocessing import StandardScaler, RobustScaler
 
 
 class DataPreprocessor:
-    def __init__(self, filepath: str, address_imbalance: bool, target_column: str):
+    def __init__(self, filepath, address_imbalance, target_column):
         self.filepath = filepath
         self.data = self.load_data()
         self.address_imbalance = address_imbalance
         self.target_column = target_column
 
     def process_data(self):
-        # Apply all preprocessing steps
         (self.drop_empty_rows_and_columns()
          .process_non_numerical_features()
          .show_data_imbalance()
@@ -130,10 +129,6 @@ class DataPreprocessor:
 
     # Doesn't seem much useful for our case, performance degrades post PCA
     def apply_pca(self, n_components=10):
-        """
-        Apply PCA to reduce dimensionality.
-        :param n_components: Number of components to keep.
-        """
         labels = self._get_labels_and_drop_if_exists()
         pca = PCA(n_components=n_components)
         self.data = pd.DataFrame(pca.fit_transform(self.data), columns=self.data.columns[:n_components])
